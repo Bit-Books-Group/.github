@@ -1,0 +1,21 @@
+name: PR Title from Branch
+
+on:
+  workflow_call:
+
+jobs:
+  set-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const [type, ...rest] = pr.head.ref.split('/');
+            const text = rest.join(' ').replace(/[-_]/g, ' ');
+            const title = rest.length ? `${type}: ${text}` : type;
+            await github.rest.pulls.update({
+              ...context.repo,
+              pull_number: pr.number,
+              title,
+            });
